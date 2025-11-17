@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/dashboard", label: "الرئيسية" },
-  { href: "/users", label: "المستخدمون" },
-  { href: "/stores", label: "المتاجر" },
-  { href: "/transactions", label: "المعاملات" },
-  { href: "/payments", label: "الدفعات" },
-  { href: "/notifications", label: "الإشعارات" },
-  { href: "/reports", label: "التقارير" },
-  { href: "/settings", label: "الإعدادات العامة" },
+  { href: "/dashboard/users", label: "المستخدمون" },
+  { href: "/dashboard/stores", label: "المتاجر" },
+  { href: "/dashboard/transactions", label: "المعاملات" },
+  { href: "/dashboard/payments", label: "الدفعات" },
+  { href: "/dashboard/notifications", label: "الإشعارات" },
+  { href: "/dashboard/profits", label: "الأرباح" },
+  { href: "/dashboard/reports", label: "التقارير" },
+  { href: "/dashboard/settings", label: "الإعدادات العامة" },
 ];
 
 export function Sidebar() {

@@ -29,9 +29,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 3
               </span>
             </button>
-            <div className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-300 border border-emerald-500/40">
-              Live collections: 96.3%
-            </div>
           </div>
         </header>
 
