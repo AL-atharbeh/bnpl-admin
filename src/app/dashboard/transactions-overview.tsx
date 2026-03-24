@@ -12,13 +12,13 @@ import {
 } from "recharts";
 
 const data = [
-  { name: "سبت", purchases: 120, payments: 90 },
-  { name: "أحد", purchases: 150, payments: 110 },
-  { name: "اثن", purchases: 130, payments: 95 },
-  { name: "ثلاث", purchases: 180, payments: 140 },
-  { name: "أربع", purchases: 200, payments: 160 },
-  { name: "خمي", purchases: 170, payments: 130 },
-  { name: "جمعة", purchases: 210, payments: 180 },
+  { name: "سبت", purchases: 0, payments: 0 },
+  { name: "أحد", purchases: 0, payments: 0 },
+  { name: "اثن", purchases: 0, payments: 0 },
+  { name: "ثلاث", purchases: 0, payments: 0 },
+  { name: "أربع", purchases: 0, payments: 0 },
+  { name: "خمي", purchases: 0, payments: 0 },
+  { name: "جمعة", purchases: 0, payments: 0 },
 ];
 
 export function TransactionsOverview() {

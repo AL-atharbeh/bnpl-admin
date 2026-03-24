@@ -2,48 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-const notifications = [
-  {
-    id: "NTF-001",
-    title: "⚠️ دفعة متأخرة",
-    message: "العميل ليلى خليل تأخرت عن قسط 3/8 بقيمة 310 دينار.",
-    time: "قبل 10 دقائق",
-    type: "warning",
-    read: false,
-  },
-  {
-    id: "NTF-002",
-    title: "✅ تم تحصيل قسط",
-    message: "تم تحصيل قسط 2/4 للعميل أحمد العتيبي بقيمة 120 دينار.",
-    time: "قبل 1 ساعة",
-    type: "success",
-    read: false,
-  },
-  {
-    id: "NTF-003",
-    title: "🛍️ طلب جديد بانتظار الموافقة",
-    message: "طلب شراء بقيمة 980 دينار من متجر مجوهرات روزي.",
-    time: "قبل 2 ساعة",
-    type: "info",
-    read: true,
-  },
-  {
-    id: "NTF-004",
-    title: "🏦 تحويل للبنك",
-    message: "تم تحويل 3 دفعات إلى البنك اليوم (إجمالي 650 دينار).",
-    time: "اليوم 09:30",
-    type: "success",
-    read: true,
-  },
-  {
-    id: "NTF-005",
-    title: "📄 تحديث مستندات",
-    message: "العميل محمد النجار رفع مستندات إضافية للمراجعة.",
-    time: "أمس 18:10",
-    type: "info",
-    read: true,
-  },
-];
+const notifications: any[] = [];
 
 const subscriptions = [
   { label: "تنبيهات الدفعات المتأخرة", enabled: true },

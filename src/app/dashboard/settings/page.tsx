@@ -2,23 +2,7 @@
 
 import { useState } from "react";
 
-const teamMembers = [
-  {
-    name: "سارة عبد الله",
-    role: "مسؤولة العمليات",
-    permissions: ["المعاملات", "المتاجر", "التقارير"],
-  },
-  {
-    name: "محمد الزهراني",
-    role: "مسؤول مخاطر",
-    permissions: ["المعاملات", "المخاطر", "الإشعارات"],
-  },
-  {
-    name: "ليلى الكندري",
-    role: "دعم العملاء",
-    permissions: ["المستخدمون", "الإشعارات"],
-  },
-];
+const teamMembers: any[] = [];
 
 const webhooks = [
   {
@@ -193,22 +177,28 @@ export default function SettingsPage() {
             تحكم في من يمكنه الوصول إلى كل قسم داخل لوحة BNPL.
           </p>
           <div className="space-y-3 text-xs text-slate-200">
-            {teamMembers.map((member) => (
-              <div
-                key={member.name}
-                className="rounded-lg border border-slate-800 bg-[#031824] p-3"
-              >
-                <div className="flex items-center justify-between text-sm text-slate-100">
-                  <span>{member.name}</span>
-                  <span className="rounded-full border border-slate-700 bg-slate-900/60 px-2 py-0.5 text-[10px] text-slate-300">
-                    {member.role}
-                  </span>
-                </div>
-                <div className="mt-2 text-[11px] text-slate-400">
-                  الصلاحيات: {member.permissions.join("، ")}
-                </div>
+            {teamMembers.length === 0 ? (
+              <div className="rounded-lg border border-slate-800 bg-[#031824] p-4 text-center text-slate-400">
+                لا يوجد أعضاء فريق
               </div>
-            ))}
+            ) : (
+              teamMembers.map((member) => (
+                <div
+                  key={member.name}
+                  className="rounded-lg border border-slate-800 bg-[#031824] p-3"
+                >
+                  <div className="flex items-center justify-between text-sm text-slate-100">
+                    <span>{member.name}</span>
+                    <span className="rounded-full border border-slate-700 bg-slate-900/60 px-2 py-0.5 text-[10px] text-slate-300">
+                      {member.role}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-[11px] text-slate-400">
+                    الصلاحيات: {member.permissions.join("، ")}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

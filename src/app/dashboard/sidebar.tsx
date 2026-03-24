@@ -7,6 +7,8 @@ const navItems = [
   { href: "/dashboard", label: "الرئيسية" },
   { href: "/dashboard/users", label: "المستخدمون" },
   { href: "/dashboard/stores", label: "المتاجر" },
+  { href: "/dashboard/categories", label: "التصنيفات" },
+  { href: "/dashboard/offers", label: "العروض" },
   { href: "/dashboard/transactions", label: "المعاملات" },
   { href: "/dashboard/payments", label: "الدفعات" },
   { href: "/dashboard/notifications", label: "الإشعارات" },
@@ -39,11 +41,10 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${
-                isActive
-                  ? "bg-emerald-500/20 text-emerald-100 border border-emerald-500/60"
-                  : "text-slate-300 hover:bg-slate-900/60 hover:text-slate-50"
-              }`}
+              className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${isActive
+                ? "bg-emerald-500/20 text-emerald-100 border border-emerald-500/60"
+                : "text-slate-300 hover:bg-slate-900/60 hover:text-slate-50"
+                }`}
             >
               <span>{item.label}</span>
               {isActive && (

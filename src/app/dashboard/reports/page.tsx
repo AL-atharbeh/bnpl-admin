@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -11,40 +11,66 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const performanceData = [
-  { month: "ينا", purchases: 28000, installments: 19500, overdue: 1800 },
-  { month: "فبر", purchases: 32000, installments: 21500, overdue: 1500 },
-  { month: "مار", purchases: 36000, installments: 24000, overdue: 2100 },
-  { month: "أبر", purchases: 42000, installments: 28000, overdue: 1600 },
-  { month: "ماي", purchases: 45000, installments: 31000, overdue: 2400 },
-  { month: "يون", purchases: 47000, installments: 33000, overdue: 2000 },
-];
-
-const riskDistribution = [
-  { label: "منخفض", value: 62, color: "text-emerald-300" },
-  { label: "متوسط", value: 27, color: "text-amber-300" },
-  { label: "مرتفع", value: 8, color: "text-red-300" },
-  { label: "قيد المراجعة", value: 3, color: "text-sky-300" },
-];
-
-const storesPerformance = [
-  { store: "مجوهرات روزي", sales: 105000, growth: "+18%" },
-  { store: "إلكترونيات ميزو", sales: 88000, growth: "+9%" },
-  { store: "هوم ديزاين", sales: 62000, growth: "+5%" },
-  { store: "متاجر الربيع", sales: 54000, growth: "+12%" },
-];
-
-const reports = [
-  { title: "تقرير الأداء الشهري", description: "حجم العمليات وتحليل الأقساط والايرادات." },
-  { title: "تقرير المخاطر", description: "توزيع العملاء حسب مستوى المخاطر والتنبيهات الحرجة." },
-  { title: "تقرير المتاجر", description: "أفضل المتاجر أداءً والمتاجر المتأخرة في التسوية." },
-  { title: "تقرير البنك", description: "ملخص التحويلات للبنك مقابل عمولة المنصة." },
-];
+import {
+  getReportsStats,
+  getReportsPerformance,
+  getReportsRisks,
+  getReportsTopStores,
+} from "@/services/api";
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<"ربع سنوي" | "شهري" | "سنوي">("ربع سنوي");
   const [reportFilter, setReportFilter] = useState("الكل");
+  const [loading, setLoading] = useState(true);
+
+  const [stats, setStats] = useState<any>(null);
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [riskDistribution, setRiskDistribution] = useState<any[]>([]);
+  const [storesPerformance, setStoresPerformance] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchData();
+  }, [period]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [statsRes, perfRes, riskRes, storesRes] = await Promise.all([
+        getReportsStats(),
+        getReportsPerformance(),
+        getReportsRisks(),
+        getReportsTopStores(),
+      ]);
+
+      setStats(statsRes.data.data);
+      setPerformanceData(perfRes.data.data);
+      setRiskDistribution(riskRes.data.data);
+      setStoresPerformance(storesRes.data.data);
+    } catch (error) {
+      console.error("Error fetching reports data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reports = [
+    { title: "تقرير الأداء الشهري", description: "حجم العمليات وتحليل الأقساط والايرادات.", category: "الأداء" },
+    { title: "تقرير المخاطر", description: "توزيع العملاء حسب مستوى المخاطر والتنبيهات الحرجة.", category: "المخاطر" },
+    { title: "تقرير المتاجر", description: "أفضل المتاجر أداءً والمتاجر المتأخرة في التسوية.", category: "المتاجر" },
+    { title: "تقرير البنك", description: "ملخص التحويلات للبنك مقابل عمولة المنصة.", category: "البنك" },
+  ];
+
+  const filteredReports = reportFilter === "الكل"
+    ? reports
+    : reports.filter(r => r.category === reportFilter);
+
+  if (loading && !stats) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-slate-400">جاري تحميل التقارير...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -61,32 +87,42 @@ export default function ReportsPage() {
             <span>📈</span> حجم العمليات الربع الحالي
           </p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            141,000 دينار
+            {stats?.totalFinancedQuarter?.toLocaleString() || 0} دينار
           </p>
-          <p className="mt-1 text-[11px] text-emerald-300">+12% عن الربع السابق</p>
+          <p className="mt-1 text-[11px] text-slate-300">
+            {stats?.totalFinancedQuarter > 0 ? "بناءً على العمليات الحالية" : "لا توجد بيانات"}
+          </p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-[#021f2a] p-4">
           <p className="text-xs text-slate-400 flex items-center gap-1">
             <span>💳</span> الأقساط المحصّلة
           </p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            94,500 دينار
+            {stats?.totalCollected?.toLocaleString() || 0} دينار
           </p>
-          <p className="mt-1 text-[11px] text-slate-300">70% من إجمالي العمليات</p>
+          <p className="mt-1 text-[11px] text-slate-300">
+            {stats?.totalCollected > 0 ? "إجمالي التحصيل الكلي" : "لا توجد بيانات"}
+          </p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-[#021f2a] p-4">
           <p className="text-xs text-slate-400 flex items-center gap-1">
             <span>⚠️</span> مؤشر المخاطر
           </p>
-          <p className="mt-2 text-2xl font-semibold text-slate-50">8%</p>
-          <p className="mt-1 text-[11px] text-slate-300">المعاملات عالية المخاطر</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-50">
+            {stats?.riskIndicator?.toFixed(1) || 0}%
+          </p>
+          <p className="mt-1 text-[11px] text-slate-300">
+            {stats?.riskIndicator > 15 ? "مرتفع" : stats?.riskIndicator > 5 ? "متوسط" : "منخفض"}
+          </p>
         </div>
         <div className="rounded-xl border border-emerald-500/70 bg-gradient-to-br from-emerald-500 to-emerald-400 p-4 text-slate-950">
           <p className="text-xs font-medium flex items-center gap-1">
             <span>🏦</span> صافي عمولة المنصة
           </p>
-          <p className="mt-2 text-2xl font-semibold">4,220 دينار</p>
-          <p className="mt-1 text-[11px]">منذ بداية الشهر</p>
+          <p className="mt-2 text-2xl font-semibold">
+            {stats?.totalCommission?.toLocaleString() || 0} دينار
+          </p>
+          <p className="mt-1 text-[11px]">أرباح من العمليات المكتملة</p>
         </div>
       </section>
 
@@ -105,9 +141,9 @@ export default function ReportsPage() {
             onChange={(e) => setPeriod(e.target.value as typeof period)}
             className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-xs text-slate-200 focus:border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           >
-            <option>ربع سنوي</option>
-            <option>شهري</option>
-            <option>سنوي</option>
+            <option value="ربع سنوي">ربع سنوي</option>
+            <option value="شهري">شهري</option>
+            <option value="سنوي">سنوي</option>
           </select>
         </div>
 
@@ -140,18 +176,18 @@ export default function ReportsPage() {
             <h2 className="text-sm font-semibold text-slate-50">توزيع المخاطر</h2>
             <span className="text-[11px] text-slate-400">حسب تقييم العملاء</span>
           </div>
-          <div className="space-y-2 text-xs text-slate-300">
+          <div className="space-y-4 text-xs text-slate-300">
             {riskDistribution.map((risk) => (
-              <div key={risk.label} className="flex items-center justify-between">
-                <span className={risk.color}>{risk.label}</span>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-40 rounded-full bg-slate-800">
-                    <div
-                      className={`h-full rounded-full ${risk.color.replace("text", "bg")}`}
-                      style={{ width: `${risk.value}%` }}
-                    />
-                  </div>
-                  <span className="text-slate-100">{risk.value}%</span>
+              <div key={risk.label} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className={risk.color}>{risk.label}</span>
+                  <span className="text-slate-100 font-semibold">{risk.value}%</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${risk.color.replace("text", "bg")}`}
+                    style={{ width: `${risk.value}%` }}
+                  />
                 </div>
               </div>
             ))}
@@ -164,20 +200,26 @@ export default function ReportsPage() {
             <span className="text-[11px] text-slate-400">آخر 30 يوم</span>
           </div>
           <div className="space-y-3 text-xs text-slate-300">
-            {storesPerformance.map((store) => (
-              <div
-                key={store.store}
-                className="rounded-lg border border-slate-800 bg-[#031824] p-3"
-              >
-                <div className="flex items-center justify-between text-sm text-slate-100">
-                  <span>{store.store}</span>
-                  <span className="text-emerald-300">{store.growth}</span>
-                </div>
-                <p className="mt-1 text-[11px] text-slate-400">
-                  مبيعات: {store.sales.toLocaleString()} دينار
-                </p>
+            {storesPerformance.length === 0 ? (
+              <div className="rounded-lg border border-slate-800 bg-[#031824] p-4 text-center text-slate-400">
+                لا توجد بيانات مبيعات حالية
               </div>
-            ))}
+            ) : (
+              storesPerformance.map((store) => (
+                <div
+                  key={store.store}
+                  className="rounded-lg border border-slate-800 bg-[#031824] p-3 hover:bg-[#042436] transition-colors"
+                >
+                  <div className="flex items-center justify-between text-sm text-slate-100 font-medium">
+                    <span>{store.store}</span>
+                    <span className="text-emerald-400 font-bold">{store.growth}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    مبيعات: {store.sales.toLocaleString()} دينار
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -195,27 +237,27 @@ export default function ReportsPage() {
             onChange={(e) => setReportFilter(e.target.value)}
             className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-xs text-slate-200 focus:border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           >
-            <option>الكل</option>
-            <option>الأداء</option>
-            <option>المخاطر</option>
-            <option>المتاجر</option>
-            <option>البنك</option>
+            <option value="الكل">كل التقارير</option>
+            <option value="الأداء">تقارير الأداء</option>
+            <option value="المخاطر">تقارير المخاطر</option>
+            <option value="المتاجر">تقارير المتاجر</option>
+            <option value="البنك">تقارير البنك</option>
           </select>
         </div>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2 text-xs text-slate-200">
-          {reports.map((report) => (
+          {filteredReports.map((report) => (
             <div
               key={report.title}
-              className="rounded-lg border border-slate-800 bg-[#031824] p-4"
+              className="rounded-lg border border-slate-800 bg-[#031824] p-4 hover:border-slate-700 transition-colors"
             >
               <h3 className="text-sm font-semibold text-slate-50">{report.title}</h3>
               <p className="mt-1 text-[11px] text-slate-400">{report.description}</p>
               <div className="mt-3 flex items-center gap-2">
-                <button className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-200 hover:bg-slate-900">
+                <button className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-200 hover:bg-slate-900 transition-colors">
                   معاينة
                 </button>
-                <button className="rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-medium text-slate-950 hover:bg-emerald-400">
+                <button className="rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-medium text-slate-950 hover:bg-emerald-400 transition-colors">
                   تنزيل PDF
                 </button>
               </div>
@@ -226,4 +268,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-

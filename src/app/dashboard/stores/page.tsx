@@ -1,196 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Store, storesService, StoreStats } from "@/services/stores.service";
+import StoreModal from "@/components/modals/StoreModal";
 
-const mockStores = [
-  {
-    id: 1,
-    name: "متاجر الربيع",
-    category: "أزياء",
-    location: "الكويت - السالمية",
-    status: "نشط",
-    statusColor: "emerald",
-    riskLevel: "منخفض",
-    riskColor: "emerald",
-    totalSales: "48,500 دينار",
-    customers: 320,
-    avgOrder: "150 دينار",
-    activationDate: "2023-08-12",
-    lastSettlement: "2025-01-18",
-    pendingPayouts: "6,200 دينار",
-    commissionRate: "3.5%",
-    payoutCycle: "أسبوعي",
-    contactPerson: "سارة القحطاني",
-    contactPhone: "+965 5550 1234",
-    contactEmail: "sara@springstores.com",
-    address: "الكويت، السالمية، مجمع مارينا",
-    contractNumber: "CNT-2023-091",
-    complianceScore: 95,
-    delayedOrders: 0,
-    topProducts: ["عباية كلاسيك", "حقيبة جلدية", "حذاء كعب"],
-  },
-  {
-    id: 2,
-    name: "إلكترونيات ميزو",
-    category: "إلكترونيات",
-    location: "الكويت - حولي",
-    status: "نشط",
-    statusColor: "emerald",
-    riskLevel: "متوسط",
-    riskColor: "amber",
-    totalSales: "85,300 دينار",
-    customers: 510,
-    avgOrder: "280 دينار",
-    activationDate: "2022-11-03",
-    lastSettlement: "2025-01-17",
-    pendingPayouts: "9,400 دينار",
-    commissionRate: "4%",
-    payoutCycle: "أسبوعي",
-    contactPerson: "مازن الشمري",
-    contactPhone: "+965 5551 6677",
-    contactEmail: "mazin@mezotech.com",
-    address: "الكويت، حولي، شارع ابن خلدون",
-    contractNumber: "CNT-2022-204",
-    complianceScore: 82,
-    delayedOrders: 4,
-    topProducts: ["Galaxy S24", "شاشة 55", "سماعات Buds"],
-  },
-  {
-    id: 3,
-    name: "هوم ديزاين",
-    category: "أثاث",
-    location: "الكويت - الشويخ",
-    status: "قيد المراجعة",
-    statusColor: "amber",
-    riskLevel: "مرتفع",
-    riskColor: "red",
-    totalSales: "22,600 دينار",
-    customers: 140,
-    avgOrder: "320 دينار",
-    activationDate: "2024-05-21",
-    lastSettlement: "2025-01-12",
-    pendingPayouts: "3,200 دينار",
-    commissionRate: "5%",
-    payoutCycle: "شهري",
-    contactPerson: "ليلى خليل",
-    contactPhone: "+965 5552 8899",
-    contactEmail: "laila@homedesign.com",
-    address: "الكويت، الشويخ الصناعية، شارع 10",
-    contractNumber: "CNT-2024-045",
-    complianceScore: 58,
-    delayedOrders: 7,
-    topProducts: ["كنبة زاوية", "طقم سفرة", "سرير رئيسي"],
-  },
-  {
-    id: 4,
-    name: "أسواق الغذاء الطازج",
-    category: "بقالة",
-    location: "الكويت - السالمية",
-    status: "متوقف مؤقتًا",
-    statusColor: "slate",
-    riskLevel: "مرتفع",
-    riskColor: "red",
-    totalSales: "12,900 دينار",
-    customers: 220,
-    avgOrder: "60 دينار",
-    activationDate: "2023-02-15",
-    lastSettlement: "2024-12-30",
-    pendingPayouts: "1,100 دينار",
-    commissionRate: "2%",
-    payoutCycle: "شهري",
-    contactPerson: "خالد المطيري",
-    contactPhone: "+965 5553 4455",
-    contactEmail: "khalid@freshmart.com",
-    address: "الكويت، السالمية، شارع سالم المبارك",
-    contractNumber: "CNT-2023-013",
-    complianceScore: 41,
-    delayedOrders: 12,
-    topProducts: ["صندوق خضار", "منتجات عضوية", "حليب طازج"],
-  },
-  {
-    id: 5,
-    name: "مجوهرات روزي",
-    category: "مجوهرات",
-    location: "الكويت - الري",
-    status: "نشط",
-    statusColor: "emerald",
-    riskLevel: "منخفض",
-    riskColor: "emerald",
-    totalSales: "102,400 دينار",
-    customers: 95,
-    avgOrder: "1,050 دينار",
-    activationDate: "2021-12-02",
-    lastSettlement: "2025-01-19",
-    pendingPayouts: "14,700 دينار",
-    commissionRate: "6%",
-    payoutCycle: "أسبوعي",
-    contactPerson: "رنا العوضي",
-    contactPhone: "+965 5554 7788",
-    contactEmail: "rana@rosyjewel.com",
-    address: "الكويت، الري، الأفنيوز المرحلة 3",
-    contractNumber: "CNT-2021-301",
-    complianceScore: 98,
-    delayedOrders: 0,
-    topProducts: ["سلسال ألماس", "خاتم سوليتير", "أقراط ذهبية"],
-  },
-];
-
-const mockStoreTransactions = [
-  {
-    id: 1,
-    storeId: 1,
-    customer: "أحمد العتيبي",
-    amount: "230 دينار",
-    date: "2025-01-18",
-    status: "مكتملة",
-    statusColor: "emerald",
-  },
-  {
-    id: 2,
-    storeId: 1,
-    customer: "ليلى خليل",
-    amount: "120 دينار",
-    date: "2025-01-15",
-    status: "متأخرة",
-    statusColor: "amber",
-  },
-  {
-    id: 3,
-    storeId: 2,
-    customer: "محمد النجار",
-    amount: "390 دينار",
-    date: "2025-01-16",
-    status: "مكتملة",
-    statusColor: "emerald",
-  },
-];
-
-const mockStorePayouts = [
-  {
-    id: 1,
-    storeId: 1,
-    amount: "4,200 دينار",
-    dueDate: "2025-01-22",
-    status: "قيد المعالجة",
-    statusColor: "amber",
-  },
-  {
-    id: 2,
-    storeId: 1,
-    amount: "3,100 دينار",
-    dueDate: "2025-01-15",
-    status: "محولة",
-    statusColor: "emerald",
-  },
-  {
-    id: 3,
-    storeId: 2,
-    amount: "5,500 دينار",
-    dueDate: "2025-01-25",
-    status: "قيد المراجعة",
-    statusColor: "amber",
-  },
-];
+const mockStoreTransactions: any[] = [];
+const mockStorePayouts: any[] = [];
 
 const statusColors = {
   emerald: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
@@ -200,27 +15,58 @@ const statusColors = {
 };
 
 export default function StoresPage() {
+  const [loading, setLoading] = useState(true);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [stats, setStats] = useState<StoreStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("الكل");
   const [riskFilter, setRiskFilter] = useState("الكل");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStores, setSelectedStores] = useState<number[]>([]);
-  const [selectedStore, setSelectedStore] =
-    useState<(typeof mockStores)[0] | null>(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [showStoreModal, setShowStoreModal] = useState(false);
   const [selectedFeaturedStore, setSelectedFeaturedStore] = useState("");
-  const [featuredStores, setFeaturedStores] = useState<number[]>([]);
+  const [showAddStoreModal, setShowAddStoreModal] = useState(false);
   const itemsPerPage = 10;
 
-  const filteredStores = mockStores.filter((store) => {
+  useEffect(() => {
+    fetchStores();
+    fetchStats();
+  }, []);
+
+  const fetchStores = async () => {
+    setLoading(true);
+    try {
+      const result = await storesService.getAll();
+      if (result && result.data) {
+        setStores(result.data);
+      } else if (Array.isArray(result)) {
+        setStores(result);
+      }
+    } catch (error) {
+      console.error("Failed to fetch stores", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const result = await storesService.getStats();
+      setStats(result);
+    } catch (error) {
+      console.error("Failed to fetch stats", error);
+    }
+  };
+
+  const filteredStores = stores.filter((store) => {
     const matchesSearch =
       store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      store.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      store.location.toLowerCase().includes(searchQuery.toLowerCase());
+      (store.category || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (store.location || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus =
-      statusFilter === "الكل" || store.status === statusFilter;
-    const matchesRisk = riskFilter === "الكل" || store.riskLevel === riskFilter;
-    return matchesSearch && matchesStatus && matchesRisk;
+      statusFilter === "الكل" || (store.isActive ? "نشط" : "غير نشط") === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   const totalPages = Math.ceil(filteredStores.length / itemsPerPage);
@@ -256,53 +102,62 @@ export default function StoresPage() {
     alert("سيتم تصدير بيانات المتاجر إلى ملف Excel");
   };
 
-  const handleViewStore = (store: (typeof mockStores)[0]) => {
+  const handleViewStore = (store: Store) => {
     setSelectedStore(store);
     setShowStoreModal(true);
   };
 
-  const storeStats = {
-    totalStores: mockStores.length,
-    activeStores: mockStores.filter((s) => s.status === "نشط").length,
-    highRiskStores: mockStores.filter((s) => s.riskLevel === "مرتفع").length,
-    reviewStores: mockStores.filter((s) => s.status === "قيد المراجعة").length,
-    totalSalesValue: mockStores.reduce(
+  const displayStats = stats || {
+    totalStores: stores.length,
+    activeStores: stores.filter((s) => s.isActive).length,
+    highRiskStores: stores.filter((s) => s.riskLevel === "مرتفع").length,
+    reviewStores: stores.filter((s) => !s.isActive).length,
+    totalSalesValue: stores.reduce(
       (sum, store) =>
         sum +
-        parseFloat(store.totalSales.replace(/,/g, "").replace(" دينار", "")),
+        parseFloat((store.totalSales || "0").replace(/,/g, "").replace(" دينار", "")),
       0
     ),
-    totalPendingPayouts: mockStores.reduce(
+    totalPendingPayouts: stores.reduce(
       (sum, store) =>
         sum +
-        parseFloat(store.pendingPayouts.replace(/,/g, "").replace(" دينار", "")),
+        parseFloat((store.pendingPayouts || "0").replace(/,/g, "").replace(" دينار", "")),
       0
     ),
   };
 
-  const topStores = [...mockStores]
+  const topStores = [...stores]
     .sort(
       (a, b) =>
-        parseFloat(b.totalSales.replace(/,/g, "")) -
-        parseFloat(a.totalSales.replace(/,/g, ""))
+        parseFloat((b.totalSales || "0").replace(/,/g, "")) -
+        parseFloat((a.totalSales || "0").replace(/,/g, ""))
     )
     .slice(0, 3);
 
-  const manualTopStores = mockStores.filter((store) =>
-    featuredStores.includes(store.id)
-  );
+  const manualTopStores = stores.filter((store) => store.topStore);
 
-  const handleAddFeaturedStore = () => {
+  const handleAddFeaturedStore = async () => {
     if (!selectedFeaturedStore) return;
     const storeId = Number(selectedFeaturedStore);
-    if (!featuredStores.includes(storeId)) {
-      setFeaturedStores([...featuredStores, storeId]);
+    const store = stores.find(s => s.id === storeId);
+    if (store && !store.topStore) {
+      try {
+        await storesService.toggleTopStore(storeId);
+        await fetchStores(); // Refresh stores list
+      } catch (error) {
+        console.error("Failed to add top store", error);
+      }
     }
     setSelectedFeaturedStore("");
   };
 
-  const handleRemoveFeaturedStore = (storeId: number) => {
-    setFeaturedStores(featuredStores.filter((id) => id !== storeId));
+  const handleRemoveFeaturedStore = async (storeId: number) => {
+    try {
+      await storesService.toggleTopStore(storeId);
+      await fetchStores(); // Refresh stores list
+    } catch (error) {
+      console.error("Failed to remove top store", error);
+    }
   };
 
   return (
@@ -321,7 +176,7 @@ export default function StoresPage() {
             <span>إجمالي المتاجر</span>
           </p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            {storeStats.totalStores}
+            {displayStats.totalStores}
           </p>
           <p className="mt-1 text-[11px] text-slate-300">متجر متعاقد</p>
         </div>
@@ -331,7 +186,7 @@ export default function StoresPage() {
             <span>المتاجر النشطة</span>
           </p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            {storeStats.activeStores}
+            {displayStats.activeStores}
           </p>
           <p className="mt-1 text-[11px] text-slate-300">متجر متاح للعملاء</p>
         </div>
@@ -341,7 +196,7 @@ export default function StoresPage() {
             <span>المتاجر عالية المخاطر</span>
           </p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            {storeStats.highRiskStores}
+            {displayStats.highRiskStores}
           </p>
           <p className="mt-1 text-[11px] text-slate-300">بحاجة لمتابعة</p>
         </div>
@@ -351,7 +206,7 @@ export default function StoresPage() {
             <span>تحت المراجعة</span>
           </p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            {storeStats.reviewStores}
+            {displayStats.reviewStores}
           </p>
           <p className="mt-1 text-[11px] text-slate-300">
             متاجر بانتظار التفعيل
@@ -363,13 +218,13 @@ export default function StoresPage() {
         <div className="rounded-xl border border-slate-800 bg-[#021f2a] p-4 shadow-[0_14px_35px_rgba(0,0,0,0.6)]">
           <p className="text-xs text-slate-400">إجمالي المبيعات عبر BNPL</p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            {storeStats.totalSalesValue.toLocaleString()} دينار
+            {displayStats.totalSalesValue.toLocaleString()} دينار
           </p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-[#021f2a] p-4 shadow-[0_14px_35px_rgba(0,0,0,0.6)]">
           <p className="text-xs text-slate-400">إجمالي المستحقات للمتاجر</p>
           <p className="mt-2 text-2xl font-semibold text-slate-50">
-            {storeStats.totalPendingPayouts.toLocaleString()} دينار
+            {displayStats.totalPendingPayouts.toLocaleString()} دينار
           </p>
         </div>
         <div className="rounded-xl border border-emerald-500/70 bg-gradient-to-br from-emerald-500 to-emerald-400 p-4 text-slate-950 shadow-[0_18px_40px_rgba(16,185,129,0.6)]">
@@ -408,7 +263,7 @@ export default function StoresPage() {
               className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm text-slate-50 focus:border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             >
               <option value="">اختر متجرًا</option>
-              {mockStores.map((store) => (
+              {stores.map((store) => (
                 <option key={store.id} value={store.id}>
                   {store.name} • {store.category}
                 </option>
@@ -507,7 +362,10 @@ export default function StoresPage() {
             >
               📥 تصدير البيانات
             </button>
-            <button className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400 transition-colors">
+            <button
+              onClick={() => setShowAddStoreModal(true)}
+              className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400 transition-colors"
+            >
               + إضافة متجر جديد
             </button>
           </div>
@@ -583,20 +441,27 @@ export default function StoresPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800 bg-[#031824] text-xs">
-              {paginatedStores.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td
-                    colSpan={11}
-                    className="px-4 py-8 text-center text-slate-400"
-                  >
-                    لا توجد متاجر مطابقة
+                  <td colSpan={11} className="px-3 py-8 text-center text-slate-400">
+                    <div className="flex justify-center items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                      جاري تحميل المتاجر...
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedStores.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="px-3 py-8 text-center text-slate-400">
+                    لا توجد متاجر تطابق بحثك
                   </td>
                 </tr>
               ) : (
                 paginatedStores.map((store) => (
                   <tr
                     key={store.id}
-                    className="hover:bg-slate-900/40 transition-colors"
+                    className={`group transition-colors hover:bg-slate-800/30 ${selectedStores.includes(store.id) ? "bg-emerald-500/5" : ""
+                      }`}
                   >
                     <td className="px-3 py-3 text-center">
                       <input
@@ -609,43 +474,51 @@ export default function StoresPage() {
                       />
                     </td>
                     <td className="px-3 py-3">
-                      <div>
-                        <p className="font-medium text-slate-50">
-                          {store.name}
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          {store.location}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 flex-shrink-0 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400">
+                          {store.logoUrl ? (
+                            <img src={store.logoUrl} alt={store.name} className="h-full w-full object-cover rounded-lg" />
+                          ) : (
+                            store.name.charAt(0)
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-100">
+                            {store.name}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {store.category || "عام"}
+                          </div>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-slate-300">
-                      {store.category}
+                    <td className="px-3 py-3 text-slate-400">{store.category || "عام"}</td>
+                    <td className="px-3 py-3 text-slate-300 font-medium">
+                      {store.totalSales || "0"}
                     </td>
-                    <td className="px-3 py-3 font-medium text-slate-50">
-                      {store.totalSales}
+                    <td className="px-3 py-3 text-slate-400">
+                      {store.customers || 0}
                     </td>
-                    <td className="px-3 py-3 text-slate-300">{store.customers}</td>
-                    <td className="px-3 py-3 text-slate-300">{store.avgOrder}</td>
+                    <td className="px-3 py-3 text-slate-400">
+                      {store.avgOrder || "0"}
+                    </td>
                     <td className="px-3 py-3">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium border ${statusColors[store.statusColor as keyof typeof statusColors]}`}
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium border ${store.isActive ? statusColors.emerald : statusColors.slate}`}
                       >
-                        {store.status}
+                        {store.isActive ? "نشط" : "غير نشط"}
                       </span>
                     </td>
                     <td className="px-3 py-3">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium border ${statusColors[store.riskColor as keyof typeof statusColors]}`}
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium border ${statusColors.emerald}`}
                       >
-                        {store.riskLevel}
+                        منخفض
                       </span>
                     </td>
                     <td className="px-3 py-3">
                       <div className="text-slate-100">
-                        {store.complianceScore}%
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        تأخيرات: {store.delayedOrders}
+                        95%
                       </div>
                     </td>
                     <td className="px-3 py-3 text-[11px] text-slate-300">
@@ -654,18 +527,15 @@ export default function StoresPage() {
                           ممول عبر البنك
                         </span>
                       </div>
-                      <p className="mt-1 text-[10px] text-slate-500">
-                        دفعات العميل تُحوَّل للبنك بعد خصم عمولتنا
-                      </p>
                     </td>
                     <td className="px-3 py-3 text-slate-100">
-                      {store.pendingPayouts}
+                      {store.pendingPayouts || "0"}
                       <div className="text-[11px] text-slate-400">
-                        آخر تسوية: {store.lastSettlement}
+                        آخر تسوية: {store.lastSettlement || "-"}
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <button
                           onClick={() => handleViewStore(store)}
                           className="rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1 text-[11px] text-slate-200 hover:bg-slate-900"
@@ -706,11 +576,10 @@ export default function StoresPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`rounded-lg px-3 py-1.5 ${
-                        currentPage === page
-                          ? "bg-emerald-500 text-slate-950 font-semibold"
-                          : "border border-slate-700 bg-slate-900/60 text-slate-300 hover:bg-slate-900"
-                      }`}
+                      className={`rounded-lg px-3 py-1.5 ${currentPage === page
+                        ? "bg-emerald-500 text-slate-950 font-semibold"
+                        : "border border-slate-700 bg-slate-900/60 text-slate-300 hover:bg-slate-900"
+                        }`}
                     >
                       {page}
                     </button>
@@ -732,130 +601,144 @@ export default function StoresPage() {
       </div>
 
       {showStoreModal && selectedStore && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-800 bg-[#021f2a] shadow-[0_25px_60px_rgba(0,0,0,0.9)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-slate-800 bg-[#021f2a] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+            {/* Header */}
             <div className="sticky top-0 flex items-center justify-between border-b border-slate-800 bg-[#021f2a] px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-50">
-                  ملف المتجر: {selectedStore.name}
-                </h2>
-                <p className="mt-1 text-xs text-slate-400">
-                  {selectedStore.category} • {selectedStore.location}
-                </p>
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-slate-800 flex items-center justify-center text-lg font-bold text-slate-400">
+                  {selectedStore.logoUrl ? (
+                    <img src={selectedStore.logoUrl} alt={selectedStore.name} className="h-full w-full object-cover rounded-lg" />
+                  ) : (
+                    selectedStore.name.charAt(0)
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-50">
+                    {selectedStore.name}
+                  </h2>
+                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <span>{selectedStore.category || "عام"}</span>
+                    <span>•</span>
+                    <span>{selectedStore.location || "غير محدد"}</span>
+                    <span>•</span>
+                    <span
+                      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium border ${selectedStore.isActive ? statusColors.emerald : statusColors.slate}`}
+                    >
+                      {selectedStore.isActive ? "نشط" : "غير نشط"}
+                    </span>
+                  </div>
+                </div>
               </div>
               <button
-                onClick={() => {
-                  setShowStoreModal(false);
-                  setSelectedStore(null);
-                }}
-                className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-900"
+                onClick={() => setShowStoreModal(false)}
+                className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-900 hover:text-slate-50 transition-colors"
               >
                 ✕ إغلاق
               </button>
             </div>
 
-            <div className="space-y-6 px-6 py-6">
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Store Info */}
               <section className="rounded-xl border border-slate-800 bg-[#031824] p-4">
-                <h3 className="text-sm font-semibold text-slate-50 mb-4">
+                <h3 className="text-sm font-semibold text-slate-50 mb-3">
                   📋 معلومات المتجر
                 </h3>
                 <div className="grid gap-4 md:grid-cols-2 text-sm">
                   <div>
-                    <p className="text-xs text-slate-400">الاسم التجاري</p>
-                    <p className="mt-1 text-slate-50">{selectedStore.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">الشخص المسؤول</p>
+                    <p className="text-xs text-slate-400">جهة الاتصال</p>
                     <p className="mt-1 text-slate-50">
-                      {selectedStore.contactPerson}
+                      {selectedStore.contactPerson || "غير متوفر"}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">رقم الهاتف</p>
                     <p className="mt-1 text-slate-50">
-                      {selectedStore.contactPhone}
+                      {selectedStore.contactPhone || "غير متوفر"}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">البريد الإلكتروني</p>
                     <p className="mt-1 text-slate-50">
-                      {selectedStore.contactEmail}
+                      {selectedStore.contactEmail || "غير متوفر"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">العنوان</p>
+                    <p className="mt-1 text-slate-50">
+                      {selectedStore.address || "غير متوفر"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">تاريخ الانضمام</p>
+                    <p className="mt-1 text-slate-50">
+                      {selectedStore.createdAt ? new Date(selectedStore.createdAt).toLocaleDateString('ar-KW') : "غير متوفر"}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">رقم العقد</p>
                     <p className="mt-1 text-slate-50">
-                      {selectedStore.contractNumber}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">تاريخ التفعيل</p>
-                    <p className="mt-1 text-slate-50">
-                      {selectedStore.activationDate}
-                    </p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <p className="text-xs text-slate-400">العنوان</p>
-                    <p className="mt-1 text-slate-50">
-                      {selectedStore.address}
+                      {"CNT-" + selectedStore.id}
                     </p>
                   </div>
                 </div>
               </section>
 
+              {/* Stats */}
               <section className="rounded-xl border border-slate-800 bg-[#031824] p-4">
-                <h3 className="text-sm font-semibold text-slate-50 mb-4">
-                  📊 الأداء والالتزام
+                <h3 className="text-sm font-semibold text-slate-50 mb-3">
+                  📊 الأداء والمخاطر
                 </h3>
                 <div className="grid gap-4 md:grid-cols-4 text-sm">
                   <div>
                     <p className="text-xs text-slate-400">إجمالي المبيعات</p>
                     <p className="mt-1 text-xl font-semibold text-slate-50">
-                      {selectedStore.totalSales}
+                      {selectedStore.totalSales || "0 د.ك"}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">العملاء</p>
                     <p className="mt-1 text-xl font-semibold text-slate-50">
-                      {selectedStore.customers}
+                      {selectedStore.customers || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">متوسط الطلب</p>
                     <p className="mt-1 text-xl font-semibold text-slate-50">
-                      {selectedStore.avgOrder}
+                      {selectedStore.avgOrder || "0 د.ك"}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">مستوى المخاطر</p>
                     <span
-                      className={`mt-1 inline-flex rounded-full px-3 py-1 text-[11px] font-medium border ${statusColors[selectedStore.riskColor as keyof typeof statusColors]}`}
+                      className={`mt-1 inline-flex rounded-full px-3 py-1 text-[11px] font-medium border ${statusColors.emerald}`}
                     >
-                      {selectedStore.riskLevel}
+                      منخفض
                     </span>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">نسبة الالتزام</p>
                     <p className="mt-1 text-xl font-semibold text-slate-50">
-                      {selectedStore.complianceScore}%
+                      95%
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">التأخيرات</p>
                     <p className="mt-1 text-xl font-semibold text-amber-300">
-                      {selectedStore.delayedOrders} طلب
+                      0 طلب
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">العمولة</p>
                     <p className="mt-1 text-xl font-semibold text-slate-50">
-                      {selectedStore.commissionRate}
+                      {selectedStore.commissionRate}%
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">دورية التحويل</p>
                     <p className="mt-1 text-xl font-semibold text-slate-50">
-                      {selectedStore.payoutCycle}
+                      أسبوعي
                     </p>
                   </div>
                 </div>
@@ -867,38 +750,11 @@ export default function StoresPage() {
                     💰 التحويلات المالية
                   </h3>
                   <span className="text-xs text-slate-400">
-                    آخر تسوية: {selectedStore.lastSettlement}
+                    آخر تسوية: {selectedStore.pendingPayouts || "لا يوجد"}
                   </span>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-800 text-xs">
-                    <thead className="bg-[#041f2e] text-slate-300">
-                      <tr>
-                        <th className="px-3 py-2 text-right">المبلغ</th>
-                        <th className="px-3 py-2 text-right">تاريخ الاستحقاق</th>
-                        <th className="px-3 py-2 text-right">الحالة</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800 text-slate-100">
-                      {mockStorePayouts
-                        .filter((p) => p.storeId === selectedStore.id)
-                        .map((payout) => (
-                          <tr key={payout.id}>
-                            <td className="px-3 py-2">{payout.amount}</td>
-                            <td className="px-3 py-2 text-slate-400">
-                              {payout.dueDate}
-                            </td>
-                            <td className="px-3 py-2">
-                              <span
-                                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] border ${statusColors[payout.statusColor as keyof typeof statusColors]}`}
-                              >
-                                {payout.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                <div className="text-center py-4 text-slate-400 text-sm">
+                  لا توجد تحويلات حالياً
                 </div>
               </section>
 
@@ -922,24 +778,11 @@ export default function StoresPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800 text-slate-100">
-                      {mockStoreTransactions
-                        .filter((t) => t.storeId === selectedStore.id)
-                        .map((transaction) => (
-                          <tr key={transaction.id}>
-                            <td className="px-3 py-2">{transaction.customer}</td>
-                            <td className="px-3 py-2">{transaction.amount}</td>
-                            <td className="px-3 py-2 text-slate-400">
-                              {transaction.date}
-                            </td>
-                            <td className="px-3 py-2">
-                              <span
-                                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] border ${statusColors[transaction.statusColor as keyof typeof statusColors]}`}
-                              >
-                                {transaction.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                      <tr>
+                        <td colSpan={4} className="px-3 py-8 text-center text-xs text-slate-400">
+                          لا توجد معاملات
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -978,8 +821,13 @@ export default function StoresPage() {
           </div>
         </div>
       )}
+
+      {/* Add Store Modal */}
+      <StoreModal
+        isOpen={showAddStoreModal}
+        onClose={() => setShowAddStoreModal(false)}
+        onSuccess={fetchStores}
+      />
     </div>
   );
 }
-
-
